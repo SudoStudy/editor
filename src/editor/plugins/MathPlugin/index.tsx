@@ -5,7 +5,7 @@ import { COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical';
 import { useEffect } from 'react';
 import { $wrapNodeInElement, mergeRegister } from '@lexical/utils';
 import { $createMathNode, MathNode } from '@/editor/nodes/MathNode';
-import { IS_MOBILE } from '@/shared/environment';
+import { IS_MOBILE } from '../../../shared/environment';
 
 type CommandPayload = {
   value: string;
