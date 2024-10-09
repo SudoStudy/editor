@@ -9,7 +9,7 @@ import { mergeRegister } from '@lexical/utils';
 import type { MathfieldElement, MathfieldElementAttributes, MoveOutEvent } from "mathlive";
 import { $isMathNode } from ".";
 import { customizeMathVirtualKeyboard } from "./mathVirtualKeyboard";
-import { IS_MOBILE } from "@/shared/environment";
+import { IS_MOBILE } from "../../../shared/environment";
 import './index.css';
 
 type CustomElement<T> = Partial<T & DOMAttributes<T>>;
