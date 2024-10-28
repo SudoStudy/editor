@@ -44,9 +44,21 @@ export class MathNode extends DecoratorNode<JSX.Element> {
   exportDOM(editor: LexicalEditor): DOMExportOutput {
     const { element } = super.exportDOM(editor);
     if (element && isHTMLElement(element)) {
+      let tempWindow = global.window;
+      let tempDocument = global.document;
+      let tempDocumentFragment = global.DocumentFragment;
+      // @ts-ignore
+      delete global.window;
+      // @ts-ignore
+      delete global.document;
+      // @ts-ignore
+      delete global.DocumentFragment;
       element.innerHTML = convertLatexToMarkup(this.getValue(), {
         registers: { 'arraystretch': 1.5 },
       });
+      global.window = tempWindow;
+      global.document = tempDocument;
+      global.DocumentFragment = tempDocumentFragment;
     }
     return { element };
   }
