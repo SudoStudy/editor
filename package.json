@@ -34,7 +34,7 @@
     "htmr": "^1.0.2",
     "lexical": "^0.18.0",
     "linkedom": "^0.18.5",
-    "mathlive": "^0.101.0",
+    "mathlive": "^0.107.1",
     "next": "14.2.13",
     "next-auth": "^4.24.8",
     "nprogress": "^0.2.0",
