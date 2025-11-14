@@ -1,42 +1,60 @@
-"use client"
-import { DOMAttributes, useRef } from "react";
-import { $createRangeSelection, $getSelection, $isNodeSelection, $isRangeSelection, $setSelection, NodeKey, RangeSelection } from 'lexical';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $getNodeByKey } from 'lexical';
-import { useEffect } from 'react';
-import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
-import { mergeRegister } from '@lexical/utils';
-import type { MathfieldElement, MathfieldElementAttributes, MoveOutEvent } from "mathlive";
+"use client";
+import React, { useRef, useEffect } from "react";
+import {
+  $createRangeSelection,
+  $getSelection,
+  $isNodeSelection,
+  $isRangeSelection,
+  $setSelection,
+  NodeKey,
+  RangeSelection,
+} from "lexical";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $getNodeByKey } from "lexical";
+import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
+import { mergeRegister } from "@lexical/utils";
+import type {
+  MathfieldElement,
+  MathfieldElementAttributes,
+  MoveOutEvent,
+} from "mathlive";
 import { $isMathNode } from ".";
 import { customizeMathVirtualKeyboard } from "./mathVirtualKeyboard";
 import { IS_MOBILE } from "../../../shared/environment";
-import './index.css';
+import "./index.css";
 
-type CustomElement<T> = Partial<T & DOMAttributes<T>>;
+type MathFieldProps = Partial<MathfieldElementAttributes> &
+  React.HTMLAttributes<MathfieldElement>;
 
-declare global {
+declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
-      ["math-field"]: CustomElement<MathfieldElementAttributes>;
+      "math-field": MathFieldProps;
     }
   }
 }
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   window.MathfieldElement.soundsDirectory = null;
   window.MathfieldElement.computeEngine = null;
   customizeMathVirtualKeyboard();
 }
 
-export type MathComponentProps = { initialValue: string; nodeKey: NodeKey; };
+export type MathComponentProps = { initialValue: string; nodeKey: NodeKey };
 
-export default function MathComponent({ initialValue, nodeKey }: MathComponentProps): JSX.Element {
+export default function MathComponent({
+  initialValue,
+  nodeKey,
+}: MathComponentProps): JSX.Element {
   const [editor] = useLexicalComposerContext();
   const lastRangeSelection = useRef<RangeSelection | null>(null);
-  const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
+  const [isSelected, setSelected, clearSelection] =
+    useLexicalNodeSelection(nodeKey);
 
   useEffect(() => {
-    const mathfield = editor.getElementByKey(nodeKey)?.querySelector("math-field") as MathfieldElement | null;
+    const mathfield = editor
+      .getElementByKey(nodeKey)
+      ?.querySelector("math-field") as MathfieldElement | null;
     if (!mathfield) return;
     if (initialValue !== mathfield.getValue()) {
       mathfield.setValue(initialValue, { silenceNotifications: true });
@@ -50,12 +68,14 @@ export default function MathComponent({ initialValue, nodeKey }: MathComponentPr
         if ($isRangeSelection(newSelection)) {
           lastRangeSelection.current = newSelection;
         }
-      }),
+      })
     );
   }, []);
 
   useEffect(() => {
-    const mathfield = editor.getElementByKey(nodeKey)?.querySelector("math-field") as MathfieldElement | null;
+    const mathfield = editor
+      .getElementByKey(nodeKey)
+      ?.querySelector("math-field") as MathfieldElement | null;
     if (!mathfield) return;
     // reselect when selection is lost and mathfield is focused
     const selection = editor.getEditorState().read($getSelection);
@@ -72,16 +92,21 @@ export default function MathComponent({ initialValue, nodeKey }: MathComponentPr
         const anchorOffset = anchor.offset;
         const isParentAnchor = anchorNode === mathNode.getParent();
         const indexWithinParent = mathNode.getIndexWithinParent();
-        const isBefore = isParentAnchor ? anchorOffset - indexWithinParent === 0 : anchorNode.isBefore(mathNode);
+        const isBefore = isParentAnchor
+          ? anchorOffset - indexWithinParent === 0
+          : anchorNode.isBefore(mathNode);
         mathfield.focus();
-        mathfield.executeCommand(isBefore ? 'moveToMathfieldStart' : 'moveToMathfieldEnd');
+        mathfield.executeCommand(
+          isBefore ? "moveToMathfieldStart" : "moveToMathfieldEnd"
+        );
       });
     }
   }, [isSelected]);
 
-
   useEffect(() => {
-    const mathfield = editor.getElementByKey(nodeKey)?.querySelector("math-field") as MathfieldElement | null;
+    const mathfield = editor
+      .getElementByKey(nodeKey)
+      ?.querySelector("math-field") as MathfieldElement | null;
     if (!mathfield) return;
 
     mathfield.smartMode = true;
@@ -89,16 +114,18 @@ export default function MathComponent({ initialValue, nodeKey }: MathComponentPr
 
     mathfield.keybindings = [
       ...mathfield.keybindings,
-      { key: '[Return]', ifMode: 'math', command: 'addRowAfter' },
-      { key: '[Enter]', ifMode: 'math', command: 'addRowAfter' },
+      { key: "[Return]", ifMode: "math", command: "addRowAfter" },
+      { key: "[Enter]", ifMode: "math", command: "addRowAfter" },
     ];
-    
+
     mathfield.registers.arraystretch = 1.5;
     // focus newly created mathfield
     if (isSelected && !mathfield.hasFocus()) {
       const selection = editor.getEditorState().read($getSelection);
       if (!$isNodeSelection(selection)) return;
-      setTimeout(() => { mathfield.focus(); }, 0);
+      setTimeout(() => {
+        mathfield.focus();
+      }, 0);
     }
 
     function onInput(event: Event) {
@@ -120,8 +147,9 @@ export default function MathComponent({ initialValue, nodeKey }: MathComponentPr
       mathVirtualKeyboard.show({ animate: true });
       const element = (mathVirtualKeyboard as any).element as HTMLElement;
       if (!element) return;
-      element.ontransitionend = () => mathfield.executeCommand("scrollIntoView");
-    };
+      element.ontransitionend = () =>
+        mathfield.executeCommand("scrollIntoView");
+    }
 
     const onBlur = (event: FocusEvent) => {
       if (!event.isTrusted) return;
@@ -130,7 +158,7 @@ export default function MathComponent({ initialValue, nodeKey }: MathComponentPr
       if (relatedTarget?.closest(".editor-toolbar")) return;
       const mathVirtualKeyboard = window.mathVirtualKeyboard;
       mathVirtualKeyboard.hide();
-    }
+    };
 
     function onKeydown(event: KeyboardEvent) {
       event.stopPropagation();
@@ -186,13 +214,16 @@ export default function MathComponent({ initialValue, nodeKey }: MathComponentPr
       mathfield.removeEventListener("blur", onBlur, true);
       mathfield.removeEventListener("keydown", onKeydown);
       mathfield.removeEventListener("move-out", onMoveout);
-      mathfield.removeEventListener("contextmenu", onContextmenu, { capture: true });
+      mathfield.removeEventListener("contextmenu", onContextmenu, {
+        capture: true,
+      });
     };
   }, [editor]);
 
-  return <math-field key={nodeKey}>
-    <style>
-      {`
+  return (
+    <math-field key={nodeKey}>
+      <style>
+        {`
         :host .ML__container {
           pointer-events: inherit; 
           padding: 0;
@@ -203,6 +234,7 @@ export default function MathComponent({ initialValue, nodeKey }: MathComponentPr
         }
         :host .ML__latex, :host .ML__text { font-family: inherit; }
       `}
-    </style>
-  </math-field>;
+      </style>
+    </math-field>
+  );
 }
